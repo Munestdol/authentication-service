@@ -2,11 +2,8 @@ package handler
 
 import (
 	"authentication-service/internal/domain"
-	"log"
 	"net/http"
-	"strings"
 
-	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
 )
 
@@ -19,7 +16,7 @@ func (h *Handler) Login(c *gin.Context) {
 
 	tokenString, err := h.services.Auth.Login(creds)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Could not create token"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Could not create token: " + err.Error()})
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{"token": tokenString})
@@ -33,27 +30,15 @@ func (h *Handler) Authenticate(c *gin.Context) {
 		return
 	}
 
-	jwtKey := h.services.Auth.Auth()
-
-	tokenString = strings.TrimPrefix(tokenString, "Bearer ")
-
-	claims := &domain.Claims{}
-	token, err := jwt.ParseWithClaims(tokenString, claims, func(token *jwt.Token) (interface{}, error) {
-		return jwtKey, nil
-	})
-
-	log.Print(err)
-	log.Print(token)
-
+	username, err := h.services.Auth.Auth(tokenString)
 	if err != nil {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid token"})
 		c.Abort()
 		return
 	}
 
-	c.Set("username", claims.Username)
+	c.Set("username", username)
 	c.Next()
-
 }
 
 func (h *Handler) ProtectedEndpoint(c *gin.Context) {
