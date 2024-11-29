@@ -4,6 +4,7 @@ import (
 	"authentication-service/internal/domain"
 	"authentication-service/internal/repository"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/dgrijalva/jwt-go"
@@ -49,8 +50,18 @@ func (s *AuthService) Login(creds domain.Credentials) (string, error) {
 	return tokenString, nil
 }
 
-func (s *AuthService) Auth() []byte {
-	return []byte(setFromEnv())
+func (s *AuthService) Auth(token string) (string, error) {
+	tokenString := strings.TrimPrefix(token, "Bearer ")
+
+	jwtToken := []byte(setFromEnv())
+	claims := &domain.Claims{}
+	parsedToken, err := jwt.ParseWithClaims(tokenString, claims, func(token *jwt.Token) (interface{}, error) { return jwtToken, nil })
+	if err != nil || !parsedToken.Valid {
+		log.Error().Err(err).Msg("error parse token with claims")
+		return "", err
+	}
+
+	return claims.Username, nil
 }
 
 func setFromEnv() (jwtKey string) {
