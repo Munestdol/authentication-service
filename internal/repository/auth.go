@@ -21,6 +21,7 @@ func (r *AuthPostgres) Login(credentials domain.Credentials) error {
 	err := r.db.Get(&id, query, &credentials.Username, &credentials.Password)
 	if err != nil {
 		log.Error().Err(err).Msg("Wrong username or password")
+		return err
 	}
 	return nil
 }
