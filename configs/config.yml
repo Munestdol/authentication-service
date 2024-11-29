@@ -1,0 +1,12 @@
+db:
+  port: 5433
+  sslmode: disable
+  host: localhost
+  username: postgres
+  dbname: rec-cinema
+
+http:
+  port: 8002
+  MaxHeaderMegabytes: 1
+  readTimeout: 10s
+  writeTimeout: 10s
