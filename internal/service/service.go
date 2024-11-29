@@ -7,7 +7,7 @@ import (
 
 type Auth interface {
 	Login(credentials domain.Credentials) (string, error)
-	Auth() []byte
+	Auth(token string) (string, error)
 }
 
 type Service struct {
