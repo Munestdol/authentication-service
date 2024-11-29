@@ -1,14 +1,21 @@
 package service
 
 import (
+	"authentication-service/internal/domain"
 	"authentication-service/internal/repository"
-
-	config "authentication-service/configs"
 )
 
-type Service struct {
+type Auth interface {
+	Login(credentials domain.Credentials) (string, error)
+	Auth() []byte
 }
 
-func NewService(repos *repository.Repository, cfg *config.Config) *Service {
-	return &Service{}
+type Service struct {
+	Auth
+}
+
+func NewService(repos *repository.Repository) *Service {
+	return &Service{
+		Auth: NewAuthService(repos.Auth),
+	}
 }
