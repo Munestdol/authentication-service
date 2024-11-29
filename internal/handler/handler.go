@@ -20,8 +20,8 @@ func (h *Handler) InitRoutes() *gin.Engine {
 
 	auth := router.Group("/auth")
 	{
-		auth.POST("/login", login)
-		auth.GET("/protected", authenticate, protectedEndpoint)
+		auth.POST("/login", h.Login)
+		auth.GET("/protected", h.Authenticate, h.ProtectedEndpoint)
 	}
 
 	return router
