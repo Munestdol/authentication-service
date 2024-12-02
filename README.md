@@ -18,9 +18,8 @@
 ```
 ### **Response:**
 ```json
-{
-  "token": "JWT_TOKEN"
-}
+"User registered successfully"
+The token is contained in cookies
 ```
 ### GET /auth/protected
 #### Headers - Authorization: Bearer JWT_TOKEN
