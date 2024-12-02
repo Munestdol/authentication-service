@@ -33,14 +33,9 @@ func (s *AuthService) Login(creds domain.Credentials) (string, error) {
 			ExpiresAt: expirationTime.Unix(),
 		},
 	}
+
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-
-	log.Print(token)
-
 	jwtKey := []byte(setFromEnv())
-
-	log.Print(jwtKey)
-
 	tokenString, err := token.SignedString(jwtKey)
 	if err != nil {
 		log.Error().Err(err).Msg("error creating token")
