@@ -1,31 +1,30 @@
 package service
 
 import (
+	config "authentication-service/configs"
 	"authentication-service/internal/domain"
 	"authentication-service/internal/repository"
-	"os"
 	"strings"
 	"time"
 
 	"github.com/dgrijalva/jwt-go"
-	"github.com/joho/godotenv"
 	"github.com/rs/zerolog/log"
 )
 
 type AuthService struct {
-	repo repository.Auth
+	repo  repository.Auth
+	token string
 }
 
-func NewAuthService(repo repository.Auth) *AuthService {
-	return &AuthService{repo: repo}
+func NewAuthService(repo repository.Auth, cfg *config.Config) *AuthService {
+	return &AuthService{repo: repo, token: cfg.Token}
 }
 
-func (s *AuthService) Login(creds domain.Credentials) (string, error) {
-	err := s.repo.Login(creds)
-	if err != nil {
-		return "", err
-	}
+func (s *AuthService) Login(creds domain.Credentials) error {
+	return s.repo.Login(creds)
+}
 
+func (s *AuthService) GetToken(creds domain.Credentials) (string, error) {
 	expirationTime := time.Now().Add(5 * time.Minute)
 	claims := &domain.Claims{
 		Username: creds.Username,
@@ -35,31 +34,22 @@ func (s *AuthService) Login(creds domain.Credentials) (string, error) {
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	jwtKey := []byte(setFromEnv())
-	tokenString, err := token.SignedString(jwtKey)
+	tokenString, err := token.SignedString([]byte(s.token))
 	if err != nil {
-		log.Error().Err(err).Msg("error creating token")
 		return "", err
 	}
-
 	return tokenString, nil
 }
 
 func (s *AuthService) Auth(token string) (string, error) {
 	tokenString := strings.TrimPrefix(token, "Bearer ")
 
-	jwtToken := []byte(setFromEnv())
 	claims := &domain.Claims{}
-	parsedToken, err := jwt.ParseWithClaims(tokenString, claims, func(token *jwt.Token) (interface{}, error) { return jwtToken, nil })
+	parsedToken, err := jwt.ParseWithClaims(tokenString, claims, func(token *jwt.Token) (interface{}, error) { return []byte(s.token), nil })
 	if err != nil || !parsedToken.Valid {
 		log.Error().Err(err).Msg("error parse token with claims")
 		return "", err
 	}
 
 	return claims.Username, nil
-}
-
-func setFromEnv() (jwtKey string) {
-	_ = godotenv.Load()
-	return os.Getenv("JWT_KEY")
 }

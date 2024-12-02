@@ -31,7 +31,7 @@ func main() {
 	}
 
 	repo := repository.NewRepository(db)
-	services := service.NewService(repo)
+	services := service.NewService(repo, cfg)
 	handlers := handler.NewHandler(services)
 	srv := server.NewServer(cfg, handlers.InitRoutes())
 

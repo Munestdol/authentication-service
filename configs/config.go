@@ -11,6 +11,7 @@ import (
 type (
 	Config struct {
 		Environment string
+		Token       string
 		Postgres    PostgresConfig
 		HTTP        HTTPConfig
 	}
@@ -76,4 +77,5 @@ func unmarshal(cfg *Config) error {
 func setFromEnv(cfg *Config) {
 	_ = godotenv.Load()
 	cfg.Postgres.Password = os.Getenv("DB_PASSWORD")
+	cfg.Token = os.Getenv("JWT_KEY")
 }

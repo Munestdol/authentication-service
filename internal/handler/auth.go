@@ -10,17 +10,22 @@ import (
 func (h *Handler) Login(c *gin.Context) {
 	var creds domain.Credentials
 	if err := c.BindJSON(&creds); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-
-	tokenString, err := h.services.Auth.Login(creds)
+	err := h.services.Auth.Login(creds)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Could not create token: " + err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
-	c.SetCookie("token", tokenString, int(300), c.Request.URL.Path, "localhost", true, true)
+	token, err := h.services.Auth.GetToken(creds)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.SetCookie("token", token, 60*5, c.Request.URL.Path, "localhost", true, true)
 
 	c.JSON(http.StatusOK, "User registered successfully")
 }
