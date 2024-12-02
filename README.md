@@ -4,6 +4,7 @@
 #### git clone https://github.com/Munestdol/authentication-service.git
 #### cd authentication-service
 #### go mod tidy
+#### create .env file with DB_PASSWORD and JWT_KEY
 ## Using
 #### go run cmd/authentication-service/main.go
 ## API Routes
