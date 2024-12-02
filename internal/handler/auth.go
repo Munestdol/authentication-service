@@ -19,7 +19,10 @@ func (h *Handler) Login(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Could not create token: " + err.Error()})
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{"token": tokenString})
+
+	c.SetCookie("token", tokenString, int(300), c.Request.URL.Path, "localhost", true, true)
+
+	c.JSON(http.StatusOK, "User registered successfully")
 }
 
 func (h *Handler) Authenticate(c *gin.Context) {
